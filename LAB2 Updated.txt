@@ -1,0 +1,93 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <cctype>
+#include <set>
+
+bool isOperator(char c) {
+    std::string operators = "+-*/=()";
+    return operators.find(c) != std::string::npos;
+}
+
+bool isPunctuation(char c) {
+    std::string punctuations = "!?,;:.";
+    return punctuations.find(c) != std::string::npos;
+}
+
+bool isKeyword(const std::string& token) {
+    std::set<std::string> keywords = {"if", "else", "while", "for", "int", "float", "char", "double", "return", "void"};
+    return keywords.find(token) != keywords.end();
+}
+
+bool isIdentifier(const std::string& token) {
+    if (token.empty() || !isalpha(token[0]) && token[0] != '_') {
+        return false;
+    }
+    for (char c : token) {
+        if (!isalnum(c) && c != '_') {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isConstant(const std::string& token) {
+    // Check if the token is an integer or floating-point constant
+    if (token.empty()) {
+        return false;
+    }
+
+    bool hasDigit = false;
+    bool hasDot = false;
+
+    for (char c : token) {
+        if (isdigit(c)) {
+            hasDigit = true;
+        } else if (c == '.' && !hasDot) {
+            hasDot = true;
+        } else {
+            return false; // Invalid character in a constant
+        }
+    }
+
+    return hasDigit;
+}
+
+int main() {
+    std::ifstream inputFile("lab2.txt");
+
+    if (!inputFile.is_open()) {
+        std::cerr << "Failed to open the input file." << std::endl;
+        return 1;
+    }
+
+    std::string line;
+    std::vector<std::string> tokens;
+    std::string token;
+
+    while (std::getline(inputFile, line)) {
+        std::istringstream ss(line);
+
+        while (ss >> token) {
+            if (isOperator(token[0])) {
+                std::cout << "Operator: " << token << std::endl;
+            } else if (isPunctuation(token[0])) {
+                std::cout << "Punctuation: " << token << std::endl;
+            } else if (isKeyword(token)) {
+                std::cout << "Keyword: " << token << std::endl;
+            } else if (isIdentifier(token)) {
+                std::cout << "Identifier: " << token << std::endl;
+            } else if (isConstant(token)) {
+                std::cout << "Constant: " << token << std::endl;
+            } else {
+                std::cout << "Token: " << token << std::endl;
+            }
+        }
+    }
+
+    inputFile.close();
+
+    return 0;
+}
