@@ -1,40 +1,93 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<CodeBlocks_project_file>
-	<FileVersion major="1" minor="6" />
-	<Project>
-		<Option title="LAB2Update" />
-		<Option pch_mode="2" />
-		<Option compiler="gcc" />
-		<Build>
-			<Target title="Debug">
-				<Option output="bin/Debug/LAB2Update" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Debug/" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-				<Compiler>
-					<Add option="-g" />
-				</Compiler>
-			</Target>
-			<Target title="Release">
-				<Option output="bin/Release/LAB2Update" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Release/" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-				<Compiler>
-					<Add option="-O2" />
-				</Compiler>
-				<Linker>
-					<Add option="-s" />
-				</Linker>
-			</Target>
-		</Build>
-		<Compiler>
-			<Add option="-Wall" />
-			<Add option="-fexceptions" />
-		</Compiler>
-		<Unit filename="main.cpp" />
-		<Extensions>
-			<lib_finder disable_auto="1" />
-		</Extensions>
-	</Project>
-</CodeBlocks_project_file>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <cctype>
+#include <set>
+
+bool isOperator(char c) {
+    std::string operators = "+-*/=()";
+    return operators.find(c) != std::string::npos;
+}
+
+bool isPunctuation(char c) {
+    std::string punctuations = "!?,;:.";
+    return punctuations.find(c) != std::string::npos;
+}
+
+bool isKeyword(const std::string& token) {
+    std::set<std::string> keywords = {"if", "else", "while", "for", "int", "float", "char", "double", "return", "void"};
+    return keywords.find(token) != keywords.end();
+}
+
+bool isIdentifier(const std::string& token) {
+    if (token.empty() || !isalpha(token[0]) && token[0] != '_') {
+        return false;
+    }
+    for (char c : token) {
+        if (!isalnum(c) && c != '_') {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isConstant(const std::string& token) {
+    // Check if the token is an integer or floating-point constant
+    if (token.empty()) {
+        return false;
+    }
+
+    bool hasDigit = false;
+    bool hasDot = false;
+
+    for (char c : token) {
+        if (isdigit(c)) {
+            hasDigit = true;
+        } else if (c == '.' && !hasDot) {
+            hasDot = true;
+        } else {
+            return false; // Invalid character in a constant
+        }
+    }
+
+    return hasDigit;
+}
+
+int main() {
+    std::ifstream inputFile("lab2.txt");
+
+    if (!inputFile.is_open()) {
+        std::cerr << "Failed to open the input file." << std::endl;
+        return 1;
+    }
+
+    std::string line;
+    std::vector<std::string> tokens;
+    std::string token;
+
+    while (std::getline(inputFile, line)) {
+        std::istringstream ss(line);
+
+        while (ss >> token) {
+            if (isOperator(token[0])) {
+                std::cout << "Operator: " << token << std::endl;
+            } else if (isPunctuation(token[0])) {
+                std::cout << "Punctuation: " << token << std::endl;
+            } else if (isKeyword(token)) {
+                std::cout << "Keyword: " << token << std::endl;
+            } else if (isIdentifier(token)) {
+                std::cout << "Identifier: " << token << std::endl;
+            } else if (isConstant(token)) {
+                std::cout << "Constant: " << token << std::endl;
+            } else {
+                std::cout << "Token: " << token << std::endl;
+            }
+        }
+    }
+
+    inputFile.close();
+
+    return 0;
+}
